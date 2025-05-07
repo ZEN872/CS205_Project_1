@@ -6,15 +6,16 @@ Each folder contains its own makefile that contains its own test cases
 If you would like to input your own puzzle to solve, then: 
 1. Go to the folder in which type of search you want to do with the puzzle
 2. Type "make" to compile the file.
+3. 
 
 Puzzle search input format: ./"name search" "puzzle order" 
 
-example: ./Uniformsearch 1 2 3 4 5 6 7 8 0
+Example: ./Uniformsearch 1 2 3 4 5 6 7 8 0
 
-inputed putted puzzle : 
+Example input Puzzle : 
 
 [1 2 3]
-                        
+      
 [4 5 6]
 
 [7 8 0]
