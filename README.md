@@ -12,6 +12,7 @@ Puzzle search input format: ./"name search" "puzzle order"
 example: ./Uniformsearch 1 2 3 4 5 6 7 8 0
 
 inputed putted puzzle : 
+
 [1 2 3]
                         
 [4 5 6]
