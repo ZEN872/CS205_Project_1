@@ -16,8 +16,10 @@ test2:
 	g++ -o $(NAME) $(NAME).cpp
 	./$(NAME) 1 2 3 0 4 5 6 7 8 
 
+
+#depth 15??
 test_long: 
-	./$(NAME) 0 1 2 3 4 5 6 7 8 
+	./$(NAME) 8 4 7 3 0 1 2 6 5 
 
 
 

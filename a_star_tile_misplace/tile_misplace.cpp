@@ -8,7 +8,7 @@
 #define NODE_CAP 75000
 using namespace std; 
 
-static int MAX_QUEUE =0, NODES_EXPAND =0; 
+static int MAX_QUEUE =0, NODES_EXPAND =0, DEPTH_SOLUTION=0; 
 bool SEARCH_SUCC = false; 
 
 ////////////////////////////////////////////
@@ -22,14 +22,16 @@ class Puzzle {
     public:
     Puzzle(){}
 
-    Puzzle(vector<vector<int>> Grid){
+    Puzzle(vector<vector<int>> Grid, int depth){
         this->Grid = Grid;
+        this->depth = depth;
         dim = Grid.size(); 
         Num_correct_in_grid(); 
         all_puzzle.insert({Grid,1});
+        //misplace_tiles =  dim*dim - Num_correct;  
     }
 
-    vector<vector<int>> cur_grid(){return Grid;}
+    vector<vector<int>> cur_grid() const {return Grid;}
 
     void Num_correct_in_grid(){
         Num_correct = 0; 
@@ -49,22 +51,30 @@ class Puzzle {
         } 
     }
 
-    int dim_(){return dim;}
+    int dim_() const {return dim;}
+    int depth_() const  {return depth;}
+    int Num_correct_()const  {return Num_correct;}
 
-    bool goalstate_met(){
+    bool goalstate_met() const {
         if(Num_correct == dim*dim){return true; }
         else{return false;} 
     }
-    vector<int> Zero_Coord(){return Zero_position; }
+    vector<int> Zero_Coord() const {return Zero_position; }
 
     private:
     vector<int> Zero_position; 
-    int dim; 
-    int Num_correct; 
-    vector<vector<int>> Grid; 
+    int dim, depth, Num_correct; 
+    //int misplace_tiles; 
+    vector<vector<int>> Grid;
 };
 
 queue<Puzzle> expand_nodes(queue<Puzzle>);
+
+struct Heuristic {
+    bool operator()(const Puzzle& a, const Puzzle& b) const {
+        return a.Num_correct_() < b.Num_correct_(); // max-heap
+    }
+};
 
 ///////////////////////////////////////////
 int  main(int argc, char *argv[]){
@@ -91,27 +101,28 @@ int  main(int argc, char *argv[]){
         Unform_search(grid); 
         printf("Number of Nodes expand: %d \n", NODES_EXPAND);
         printf("Max Queue: %d \n", MAX_QUEUE);
+        printf("Solution found at Depth: %d\n",DEPTH_SOLUTION);
 
     }
     
     return 0; 
 }
 ///////////////////////////////////////////////////////
-    queue<Puzzle> add_node(queue<Puzzle> inserted_node, int x, int y,int x1, int y1){
+priority_queue<Puzzle, vector<Puzzle>,Heuristic>  add_node(priority_queue<Puzzle, vector<Puzzle>,Heuristic> inserted_node, int x, int y,int x1, int y1){
         if(!inserted_node.size() == 0){
             Puzzle NewNode; 
-            vector<vector<int>> placeholder = inserted_node.front().cur_grid(); 
+            vector<vector<int>> placeholder = inserted_node.top().cur_grid(); 
         
             if(map_check(placeholder)){return inserted_node; }
 
-            bool x_check = (x1 < inserted_node.front().dim_() && x1 > -1); 
-            bool y_check = (y1 < inserted_node.front().dim_() && y1 > -1); 
+            bool x_check = (x1 < inserted_node.top().dim_() && x1 > -1); 
+            bool y_check = (y1 < inserted_node.top().dim_() && y1 > -1); 
 
             if(x_check && y_check){
                 swap(placeholder[x][y], placeholder[x1][y1]); 
                 if(map_check(placeholder)){
 
-                    NewNode = Puzzle(placeholder);
+                    NewNode = Puzzle(placeholder,inserted_node.top().depth_()+1);
                     inserted_node.push(NewNode);
                     NODES_EXPAND++; 
                     if(MAX_QUEUE < inserted_node.size()){
@@ -120,6 +131,7 @@ int  main(int argc, char *argv[]){
 
                     if (NewNode.goalstate_met()){
                         SEARCH_SUCC = true; 
+                        DEPTH_SOLUTION = NewNode.depth_();
                         return {}; }
                     
                 }
@@ -128,11 +140,11 @@ int  main(int argc, char *argv[]){
             return inserted_node; 
     } 
 
-    queue<Puzzle> expand_nodes(queue<Puzzle> inserted_node){
+    priority_queue<Puzzle, vector<Puzzle>,Heuristic>  expand_nodes(priority_queue<Puzzle, vector<Puzzle>,Heuristic>  inserted_node){
         if(inserted_node.size() == 0 ){return inserted_node;}
 
-        int x = inserted_node.front().Zero_Coord()[0];
-        int y = inserted_node.front().Zero_Coord()[1];
+        int x = inserted_node.top().Zero_Coord()[0];
+        int y = inserted_node.top().Zero_Coord()[1];
 
             inserted_node = add_node(inserted_node, x,y, x+1,y); 
             inserted_node = add_node(inserted_node, x,y, x-1,y); 
@@ -144,11 +156,12 @@ int  main(int argc, char *argv[]){
 
 
     int Unform_search(vector<vector<int>> Siding_puzzle){
-        Puzzle inital_puzzle = Puzzle(Siding_puzzle); 
-        queue<Puzzle> Search_queue;
+        Puzzle inital_puzzle = Puzzle(Siding_puzzle,0); 
         
+        priority_queue<Puzzle, vector<Puzzle>,Heuristic>  Search_queue;
         Search_queue.push(inital_puzzle);
-        if(Search_queue.front().goalstate_met()){
+
+        if(Search_queue.top().goalstate_met()){
             return 1;  
         }
 

@@ -8,7 +8,7 @@
 #define NODE_CAP 75000
 using namespace std; 
 
-static int MAX_QUEUE =0, NODES_EXPAND =0; 
+static int MAX_QUEUE =0, NODES_EXPAND =0, DEPTH_SOLUTION =0; 
 bool SEARCH_SUCC = false; 
 
 ////////////////////////////////////////////
@@ -22,8 +22,9 @@ class Puzzle {
     public:
     Puzzle(){}
 
-    Puzzle(vector<vector<int>> Grid){
+    Puzzle(vector<vector<int>> Grid, int depth){
         this->Grid = Grid;
+        this->depth = depth;
         dim = Grid.size(); 
         Num_correct_in_grid(); 
         all_puzzle.insert({Grid,1});
@@ -50,6 +51,7 @@ class Puzzle {
     }
 
     int dim_(){return dim;}
+    int depth_(){return depth;}
 
     bool goalstate_met(){
         if(Num_correct == dim*dim){return true; }
@@ -61,11 +63,11 @@ class Puzzle {
     vector<int> Zero_position; 
     int dim; 
     int Num_correct; 
-    vector<vector<int>> Grid; 
+    vector<vector<int>> Grid;
+    int depth;  
 };
 
 queue<Puzzle> expand_nodes(queue<Puzzle>);
-
 
 ///////////////////////////////////////////
 int  main(int argc, char *argv[]){
@@ -92,6 +94,7 @@ int  main(int argc, char *argv[]){
         Unform_search(grid); 
         printf("Number of Nodes expand: %d \n", NODES_EXPAND);
         printf("Max Queue: %d \n", MAX_QUEUE);
+        printf("Solution found at Depth: %d\n",DEPTH_SOLUTION);
 
     }
     
@@ -112,7 +115,7 @@ int  main(int argc, char *argv[]){
                 swap(placeholder[x][y], placeholder[x1][y1]); 
                 if(map_check(placeholder)){
 
-                    NewNode = Puzzle(placeholder);
+                    NewNode = Puzzle(placeholder,inserted_node.front().depth_()+1);
                     inserted_node.push(NewNode);
                     NODES_EXPAND++; 
                     if(MAX_QUEUE < inserted_node.size()){
@@ -121,6 +124,7 @@ int  main(int argc, char *argv[]){
 
                     if (NewNode.goalstate_met()){
                         SEARCH_SUCC = true; 
+                        DEPTH_SOLUTION = NewNode.depth_();
                         return {}; }
                     
                 }
@@ -145,8 +149,10 @@ int  main(int argc, char *argv[]){
 
 
     int Unform_search(vector<vector<int>> Siding_puzzle){
-        Puzzle inital_puzzle = Puzzle(Siding_puzzle); 
+        Puzzle inital_puzzle = Puzzle(Siding_puzzle,0); 
+        
         queue<Puzzle> Search_queue;
+
         
         Search_queue.push(inital_puzzle);
         if(Search_queue.front().goalstate_met()){
