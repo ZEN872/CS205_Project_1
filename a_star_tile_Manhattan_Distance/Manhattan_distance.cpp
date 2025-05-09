@@ -16,6 +16,7 @@ map<vector<vector<int>>,int > all_puzzle;
 bool map_check(vector<vector<int>>);
 void print_grid(vector<vector<int>> );
 int Unform_search(vector<vector<int>> );
+int find_distance(int,int,int,int);
 ///////////////////////////////////////////
 
 class Puzzle {
@@ -34,14 +35,18 @@ class Puzzle {
 
     void Num_correct_in_grid(){
         Num_correct = 0; 
+        Manhattan_distance = 0;
         int current = 1; 
         for( int i = 0; i < dim;i++){
             for(int j =0; j < dim; j++){
                 if(current >= dim * dim )
                     {Num_correct++; }
                 else if(Grid[i][j] == current)
-                    {Num_correct++; }
-                    current++; 
+                    {Num_correct++;}         
+                else{
+                    Manhattan_distance = Manhattan_distance + find_distance(i,j,current,dim);
+                }
+                current++; 
 
                 if(Grid[i][j] == 0) {
                     Zero_position = {i,j};
@@ -53,6 +58,7 @@ class Puzzle {
     int dim_()const{return dim;}
     int depth_()const{return depth;}
     int num_correct_() const { return Num_correct; }
+    int Manhattan_distance_() const {return Manhattan_distance;}
 
     bool goalstate_met() const{
         if(Num_correct == dim*dim){return true; }
@@ -66,12 +72,33 @@ class Puzzle {
     int Num_correct; 
     vector<vector<int>> Grid;
     int depth;  
+    int Manhattan_distance; 
 };
+
+int find_distance(int y ,int x, int Current, int dim ){
+    int new_y, new_x;
+    if(Current <= dim ) {
+        new_y = 0; 
+    }
+    else {
+        new_y = Current/dim; 
+    }
+
+    for(int i = 0; i< dim ;i++){
+        new_x = new_y*dim + i +1; 
+        if(Current == new_x ){
+            break;
+        }
+    }
+    
+    return abs(new_x -x) +  abs(new_y-y);
+} 
 
 struct Heuristic {
     bool operator()(const Puzzle& a, const Puzzle& b) const {
         // Max-heap: higher Num_correct has higher priority
-        return a.num_correct_() < b.num_correct_();
+        //return a.num_correct_() < b.num_correct_();
+        return !(a.Manhattan_distance_() <= b.Manhattan_distance_());
     }
 };
 
