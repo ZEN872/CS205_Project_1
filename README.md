@@ -13,9 +13,9 @@ Example: ./Uniformsearch 1 2 3 4 5 6 7 8 0
 
 Example input Puzzle : 
 
-.[1 2 3]
-.[4 5 6]
-.[7 8 0]
+1.Row: [1 2 3]
+2.Row: [4 5 6]
+3.Row: [7 8 0]
 
 # RUN MakeFile Testcases:
 
