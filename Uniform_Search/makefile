@@ -1,4 +1,4 @@
-NAME = Uniform_Search
+NAME = Uniform_search
 
 make: 
 	g++ -o $(NAME) $(NAME).cpp
