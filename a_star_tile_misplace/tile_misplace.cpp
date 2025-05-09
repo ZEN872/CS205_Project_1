@@ -8,7 +8,7 @@
 #define NODE_CAP 75000
 using namespace std; 
 
-static int MAX_QUEUE =0, NODES_EXPAND =0, DEPTH_SOLUTION=0; 
+static int MAX_QUEUE =0, NODES_EXPAND =0, DEPTH_SOLUTION =0; 
 bool SEARCH_SUCC = false; 
 
 ////////////////////////////////////////////
@@ -28,10 +28,9 @@ class Puzzle {
         dim = Grid.size(); 
         Num_correct_in_grid(); 
         all_puzzle.insert({Grid,1});
-        //misplace_tiles =  dim*dim - Num_correct;  
     }
 
-    vector<vector<int>> cur_grid() const {return Grid;}
+    vector<vector<int>> cur_grid()const {return Grid;}
 
     void Num_correct_in_grid(){
         Num_correct = 0; 
@@ -51,30 +50,31 @@ class Puzzle {
         } 
     }
 
-    int dim_() const {return dim;}
-    int depth_() const  {return depth;}
-    int Num_correct_()const  {return Num_correct;}
+    int dim_()const{return dim;}
+    int depth_()const{return depth;}
+    int num_correct_() const { return Num_correct; }
 
-    bool goalstate_met() const {
+    bool goalstate_met() const{
         if(Num_correct == dim*dim){return true; }
         else{return false;} 
     }
-    vector<int> Zero_Coord() const {return Zero_position; }
+    vector<int> Zero_Coord(){return Zero_position; }
 
     private:
     vector<int> Zero_position; 
-    int dim, depth, Num_correct; 
-    //int misplace_tiles; 
+    int dim; 
+    int Num_correct; 
     vector<vector<int>> Grid;
+    int depth;  
 };
-
-queue<Puzzle> expand_nodes(queue<Puzzle>);
 
 struct Heuristic {
     bool operator()(const Puzzle& a, const Puzzle& b) const {
-        return a.Num_correct_() < b.Num_correct_(); // max-heap
+        // Max-heap: higher Num_correct has higher priority
+        return a.num_correct_() < b.num_correct_();
     }
 };
+
 
 ///////////////////////////////////////////
 int  main(int argc, char *argv[]){
@@ -108,21 +108,23 @@ int  main(int argc, char *argv[]){
     return 0; 
 }
 ///////////////////////////////////////////////////////
-priority_queue<Puzzle, vector<Puzzle>,Heuristic>  add_node(priority_queue<Puzzle, vector<Puzzle>,Heuristic> inserted_node, int x, int y,int x1, int y1){
-        if(!inserted_node.size() == 0){
+ 
+priority_queue<Puzzle, vector<Puzzle>, Heuristic>  add_node(  priority_queue<Puzzle, vector<Puzzle>, Heuristic> inserted_node, Puzzle puzzle_, int x, int y,int x1, int y1){
+        if(!inserted_node.size() == 0 ){
             Puzzle NewNode; 
-            vector<vector<int>> placeholder = inserted_node.top().cur_grid(); 
+            vector<vector<int>> placeholder = puzzle_.cur_grid(); 
         
             if(map_check(placeholder)){return inserted_node; }
 
-            bool x_check = (x1 < inserted_node.top().dim_() && x1 > -1); 
-            bool y_check = (y1 < inserted_node.top().dim_() && y1 > -1); 
+            bool x_check = (x1 < puzzle_.dim_() && x1 > -1); 
+            bool y_check = (y1 < puzzle_.dim_() && y1 > -1); 
 
             if(x_check && y_check){
                 swap(placeholder[x][y], placeholder[x1][y1]); 
                 if(map_check(placeholder)){
 
-                    NewNode = Puzzle(placeholder,inserted_node.top().depth_()+1);
+                    NewNode = Puzzle(placeholder,puzzle_.depth_()+1);
+
                     inserted_node.push(NewNode);
                     NODES_EXPAND++; 
                     if(MAX_QUEUE < inserted_node.size()){
@@ -140,17 +142,23 @@ priority_queue<Puzzle, vector<Puzzle>,Heuristic>  add_node(priority_queue<Puzzle
             return inserted_node; 
     } 
 
-    priority_queue<Puzzle, vector<Puzzle>,Heuristic>  expand_nodes(priority_queue<Puzzle, vector<Puzzle>,Heuristic>  inserted_node){
+    priority_queue<Puzzle, vector<Puzzle>, Heuristic>  expand_nodes(priority_queue<Puzzle, vector<Puzzle>, Heuristic>  inserted_node){
         if(inserted_node.size() == 0 ){return inserted_node;}
-
-        int x = inserted_node.top().Zero_Coord()[0];
-        int y = inserted_node.top().Zero_Coord()[1];
-
-            inserted_node = add_node(inserted_node, x,y, x+1,y); 
-            inserted_node = add_node(inserted_node, x,y, x-1,y); 
-            inserted_node = add_node(inserted_node, x,y, x,y-1);
-            inserted_node = add_node(inserted_node, x,y, x,y+1);
         
+        Puzzle puzzle_ =  inserted_node.top();
+        int oldsize = inserted_node.size();  
+        //inserted_node.pop();
+        int x = puzzle_.Zero_Coord()[0];
+        int y = puzzle_.Zero_Coord()[1];
+
+            inserted_node = add_node(inserted_node, puzzle_,x,y, x+1,y); 
+            inserted_node = add_node(inserted_node, puzzle_,x,y, x-1,y); 
+            inserted_node = add_node(inserted_node, puzzle_,x,y, x,y-1);
+            inserted_node = add_node(inserted_node, puzzle_,x,y, x,y+1);
+
+        if(oldsize == inserted_node.size()){
+            inserted_node.pop();
+        } 
         return inserted_node; 
     }
 
@@ -158,9 +166,10 @@ priority_queue<Puzzle, vector<Puzzle>,Heuristic>  add_node(priority_queue<Puzzle
     int Unform_search(vector<vector<int>> Siding_puzzle){
         Puzzle inital_puzzle = Puzzle(Siding_puzzle,0); 
         
-        priority_queue<Puzzle, vector<Puzzle>,Heuristic>  Search_queue;
+        priority_queue<Puzzle, vector<Puzzle>, Heuristic> Search_queue;
+        //queue<Puzzle> Search_queue;
+        
         Search_queue.push(inital_puzzle);
-
         if(Search_queue.top().goalstate_met()){
             return 1;  
         }
@@ -168,12 +177,13 @@ priority_queue<Puzzle, vector<Puzzle>,Heuristic>  add_node(priority_queue<Puzzle
          while(Search_queue.size() > 0 ){
             Search_queue = expand_nodes(Search_queue); 
            
-            if(Search_queue.size() > 0 ){ 
+            if(Search_queue.size() > 0 ){
+
                 if (NODES_EXPAND > NODE_CAP ){
                     printf ("Nodes Expand exceeded %d\n Search FAILED\n",NODE_CAP ); 
                     return -1; 
                 } 
-                Search_queue.pop();
+                //
             }
         
             }

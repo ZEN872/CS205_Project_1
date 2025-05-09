@@ -139,6 +139,7 @@ int  main(int argc, char *argv[]){
         int x = inserted_node.front().Zero_Coord()[0];
         int y = inserted_node.front().Zero_Coord()[1];
 
+        
             inserted_node = add_node(inserted_node, x,y, x+1,y); 
             inserted_node = add_node(inserted_node, x,y, x-1,y); 
             inserted_node = add_node(inserted_node, x,y, x,y-1);
