@@ -16,6 +16,8 @@ Example of the inputted Puzzle :
 2. Row_2: [4 5 6]
 3. Row_3: [7 8 0]
 
+**NOTE: zero is the placement of the empty space**
+
 # RUN MakeFile Testcases:
 
 If you would like to run the test case, go into the folder of the Search type you want to test and type:
