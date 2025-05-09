@@ -1,5 +1,5 @@
-# CS205_Project_1
-This is the project made in SPRING 2025 CS 205
+# CS205_Project_1 - The 8-Puzzle
+This is the project made for UCR SPRING 2025 CS 205: Introduction to Artificial Intelligence 
 
 # How to run the Programs
 Each folder contains its own makefile that contains its own test cases
