@@ -12,9 +12,9 @@ If you would like to input your own puzzle to solve, then:
 Example: ./Uniformsearch 1 2 3 4 5 6 7 8 0
 
 Example input Puzzle : 
-1. Row: [1 2 3]
-2. Row: [4 5 6]
-3. Row: [7 8 0]
+Row_1. [1 2 3]
+Row_2. [4 5 6]
+Row_3. [7 8 0]
 
 # RUN MakeFile Testcases:
 
