@@ -7,7 +7,7 @@ Each folder contains its own makefile that contains its own test cases
 If you would like to input your own puzzle to solve, then: 
 1. Go to the folder of the type of search you wish to perform
 2. Type "make" to compile the file.
-3. Then enter your input using the following format: ./"name search" "puzzle order" 
+3. Then enter your input using the following format: ./"name of search method" "puzzle order" 
 
 Example: ./Uniformsearch 1 2 3 4 5 6 7 8 0
 
